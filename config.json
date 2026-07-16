@@ -1,0 +1,20 @@
+{
+  "botName": "ZX Sync",
+  "version": "1.0.0",
+  "developer": "Your Name",
+  "color": {
+    "primary": "#5865F2",
+    "success": "#57F287",
+    "error": "#ED4245",
+    "warning": "#FEE75C",
+    "info": "#5865F2"
+  },
+  "staffRoles": ["Owner", "Administrator", "Moderator"],
+  "channels": {
+    "log": "LOG_CHANNEL_ID_HERE",
+    "welcome": "WELCOME_CHANNEL_ID_HERE",
+    "goodbye": "GOODBYE_CHANNEL_ID_HERE"
+  },
+  "autoRole": "",
+  "ticketSupportRole": "SUPPORT_ROLE_ID_HERE"
+}
