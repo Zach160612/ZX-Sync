@@ -61,6 +61,7 @@ const CATEGORIES = [
       { name: '/poll', description: 'Create a poll' },
       { name: '/giveaway', description: 'Start a giveaway' },
       { name: '/embed', description: 'Build a custom embed announcement' },
+      { name: '/testwelcome', description: 'Test the welcome image generation' },
       { name: '/welcome message', description: 'Set the welcome message for new members' },
       { name: '/welcome channel', description: 'Set the welcome channel' },
       { name: '/welcome type', description: 'Set welcome type (image or text)' },
