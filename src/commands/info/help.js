@@ -30,10 +30,8 @@ const CATEGORIES = [
   {
     name: '🎭 Role Management',
     commands: [
-      { name: '/role create', description: 'Create a new role' },
+      { name: '/role create', description: 'Create a new role (optionally assign to user)' },
       { name: '/role delete', description: 'Delete a role' },
-      { name: '/role color', description: 'Change a role\'s color' },
-      { name: '/role give', description: 'Give a role to a member' },
       { name: '/role remove', description: 'Remove a role from a member' },
     ],
     staffOnly: true,
