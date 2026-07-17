@@ -36,6 +36,21 @@ module.exports = {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('give')
+        .setDescription('Give a role to a member.')
+        .addUserOption((o) => o.setName('user').setDescription('The member').setRequired(false))
+        .addRoleOption((o) => o.setName('role').setDescription('The role to give').setRequired(true))
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('color')
+        .setDescription('Change a role\'s color.')
+        .addRoleOption((o) => o.setName('role').setDescription('The role to color').setRequired(true))
+        .addStringOption((o) => o.setName('color').setDescription('Hex color (e.g. #FF5733)').setRequired(true))
+        .addUserOption((o) => o.setName('user').setDescription('Choose a user to also assign this role to').setRequired(false))
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('remove')
         .setDescription('Remove a role from a member.')
         .addUserOption((o) => o.setName('user').setDescription('The member').setRequired(true))
@@ -101,6 +116,57 @@ module.exports = {
         }));
       } catch (err) {
         await interaction.reply({ embeds: [errorEmbed(`Failed to delete role: ${err.message}`)], ephemeral: true });
+      }
+
+    // ── GIVE ──
+    } else if (sub === 'give') {
+      const role = interaction.options.getRole('role');
+      const targetUser = interaction.options.getMember('user') || interaction.member;
+
+      try {
+        await targetUser.roles.add(role, `Role given by ${interaction.user.tag}`);
+        await interaction.reply({ embeds: [successEmbed(`Gave **${role.name}** to ${targetUser}.`)] });
+
+        await logAction(interaction.client, buildLogEmbed({
+          title: '🎭 Role Given',
+          color: config.color.success,
+          description: `**${role.name}** was given to ${targetUser.user.tag} by ${interaction.user.tag}.`,
+          fields: [{ name: 'Role', value: `${role} (${role.id})`, inline: true }],
+        }));
+      } catch (err) {
+        await interaction.reply({ embeds: [errorEmbed(`Failed to give role: ${err.message}`)], ephemeral: true });
+      }
+
+    // ── COLOR ──
+    } else if (sub === 'color') {
+      const role = interaction.options.getRole('role');
+      const colorStr = interaction.options.getString('color');
+      const color = parseColor(colorStr);
+      const targetUser = interaction.options.getMember('user');
+
+      if (color === null) {
+        return interaction.reply({ embeds: [errorEmbed('Invalid hex color. Use format `#RRGGBB`.')], ephemeral: true });
+      }
+
+      try {
+        await role.setColor(color, `Color changed by ${interaction.user.tag}`);
+        
+        let description = `Changed color of **${role.name}** to ${colorStr}.`;
+        if (targetUser) {
+          await targetUser.roles.add(role, `Assigned after color change by ${interaction.user.tag}`);
+          description = `Changed color of **${role.name}** to ${colorStr} and assigned to ${targetUser}.`;
+        }
+
+        await interaction.reply({ embeds: [successEmbed(description)] });
+
+        await logAction(interaction.client, buildLogEmbed({
+          title: '🎭 Role Color Changed',
+          color: config.color.success,
+          description: `Color of **${role.name}** was changed to ${colorStr} by ${interaction.user.tag}.${targetUser ? ` Assigned to ${targetUser.user.tag}.` : ''}`,
+          fields: [{ name: 'Role', value: `${role} (${role.id})`, inline: true }],
+        }));
+      } catch (err) {
+        await interaction.reply({ embeds: [errorEmbed(`Failed to change role color: ${err.message}`)], ephemeral: true });
       }
 
     // ── REMOVE ──
