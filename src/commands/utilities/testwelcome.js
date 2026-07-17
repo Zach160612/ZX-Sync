@@ -7,8 +7,7 @@ const config = require('../../../config.json');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('testwelcome')
-    .setDescription('Test the welcome image generation (staff only).')
-    .setDefaultMemberPermissions(0), // No default permissions, handled in execute
+    .setDescription('Test the welcome image generation (staff only).'),
 
   async execute(interaction) {
     if (!hasPermission(interaction.member)) return denyPermission(interaction);
@@ -16,8 +15,12 @@ module.exports = {
     await interaction.deferReply();
 
     try {
+      console.log('Starting welcome image generation for:', interaction.user.username);
+      
       // Generate welcome image for the current user
       const imageBuffer = await generateWelcomeImage(interaction.member, interaction.guild.name);
+      console.log('Image generated successfully');
+      
       const attachment = new AttachmentBuilder(imageBuffer, { name: 'welcome.png' });
 
       // Create welcome embed
@@ -30,6 +33,7 @@ module.exports = {
         .setFooter({ text: `Member #${interaction.guild.memberCount}` });
 
       await interaction.editReply({ embeds: [embed], files: [attachment] });
+      console.log('Test welcome sent successfully');
     } catch (err) {
       console.error('Error generating test welcome image:', err);
       await interaction.editReply({ content: `Error generating welcome image: ${err.message}` });
