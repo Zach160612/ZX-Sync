@@ -38,8 +38,8 @@ module.exports = {
       sub
         .setName('give')
         .setDescription('Give a role to a member.')
-        .addUserOption((o) => o.setName('user').setDescription('The member').setRequired(false))
         .addRoleOption((o) => o.setName('role').setDescription('The role to give').setRequired(true))
+        .addUserOption((o) => o.setName('user').setDescription('The member').setRequired(false))
     )
     .addSubcommand((sub) =>
       sub
