@@ -63,6 +63,7 @@ const CATEGORIES = [
       { name: '/embed', description: 'Build a custom embed announcement' },
       { name: '/welcome message', description: 'Set the welcome message for new members' },
       { name: '/welcome channel', description: 'Set the welcome channel' },
+      { name: '/welcome type', description: 'Set welcome type (image or text)' },
       { name: '/welcome enable', description: 'Enable the welcome system' },
       { name: '/welcome disable', description: 'Disable the welcome system' },
     ],

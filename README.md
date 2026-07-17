@@ -112,6 +112,7 @@ npm start
 | `/embed title description` | Build a custom embed |
 | `/welcome message` | Set the welcome message for new members |
 | `/welcome channel` | Set the welcome channel |
+| `/welcome type` | Set welcome type (image or text) |
 | `/welcome enable` | Enable the welcome system |
 | `/welcome disable` | Disable the welcome system |
 

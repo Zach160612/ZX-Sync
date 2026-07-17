@@ -25,6 +25,20 @@ module.exports = {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('type')
+        .setDescription('Set the welcome message type (image or text).')
+        .addStringOption((o) => 
+          o.setName('type')
+            .setDescription('The type of welcome message')
+            .setRequired(true)
+            .addChoices(
+              { name: 'Image', value: 'image' },
+              { name: 'Text', value: 'text' }
+            )
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('enable')
         .setDescription('Enable the welcome system.')
     )
@@ -79,6 +93,26 @@ module.exports = {
         }));
       } catch (err) {
         await interaction.reply({ embeds: [errorEmbed(`Failed to set welcome channel: ${err.message}`)], ephemeral: true });
+      }
+
+    // ── TYPE ──
+    } else if (sub === 'type') {
+      const type = interaction.options.getString('type');
+
+      try {
+        config.welcomeType = type;
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+        
+        await interaction.reply({ embeds: [successEmbed(`Welcome type set to ${type}.`)] });
+
+        await logAction(interaction.client, buildLogEmbed({
+          title: '👋 Welcome Type Updated',
+          color: config.color.success,
+          description: `Welcome type was set to ${type} by ${interaction.user.tag}.`,
+          fields: [{ name: 'Type', value: type, inline: true }],
+        }));
+      } catch (err) {
+        await interaction.reply({ embeds: [errorEmbed(`Failed to set welcome type: ${err.message}`)], ephemeral: true });
       }
 
     // ── ENABLE ──
