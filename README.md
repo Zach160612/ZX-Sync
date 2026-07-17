@@ -110,6 +110,10 @@ npm start
 | `/poll question type` | Create a poll |
 | `/giveaway prize duration winners` | Start a giveaway |
 | `/embed title description` | Build a custom embed |
+| `/welcome message` | Set the welcome message for new members |
+| `/welcome channel` | Set the welcome channel |
+| `/welcome enable` | Enable the welcome system |
+| `/welcome disable` | Disable the welcome system |
 
 ---
 
