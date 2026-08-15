@@ -10,7 +10,7 @@
     "info": "#5865F2"
   },
   "welcomeEnabled": true,
-  "welcomeType": "text",
+  "welcomeType": "image",
   "channels": {
     "log": "LOG_CHANNEL_ID_HERE"
   },
