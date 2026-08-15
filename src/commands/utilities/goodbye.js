@@ -8,12 +8,12 @@ const fs = require('fs');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('welcome')
-    .setDescription('Set the channel where welcome messages are sent.')
+    .setName('goodbye')
+    .setDescription('Set the channel where goodbye messages are sent when someone leaves.')
     .addChannelOption((o) =>
       o
         .setName('channel')
-        .setDescription('The channel to send welcome messages to')
+        .setDescription('The channel to send goodbye messages to')
         .addChannelTypes(ChannelType.GuildText)
         .setRequired(true)
     ),
@@ -26,22 +26,22 @@ module.exports = {
 
     try {
       if (!config.channels) config.channels = {};
-      config.channels.welcome = channel.id;
+      config.channels.goodbye = channel.id;
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
       await interaction.reply({
-        embeds: [successEmbed(`✅ Welcome channel set to ${channel}.`)],
+        embeds: [successEmbed(`✅ Goodbye channel set to ${channel}. Members will be farewelled there when they leave!`)],
       });
 
       await logAction(interaction.client, buildLogEmbed({
-        title: '👋 Welcome Channel Updated',
+        title: '🚪 Goodbye Channel Updated',
         color: config.color.success,
-        description: `Welcome channel set to ${channel} by **${interaction.user.tag}**.`,
+        description: `Goodbye channel set to ${channel} by **${interaction.user.tag}**.`,
         fields: [{ name: 'Channel', value: `${channel} (${channel.id})`, inline: true }],
       }));
     } catch (err) {
       await interaction.reply({
-        embeds: [errorEmbed(`Failed to set welcome channel: ${err.message}`)],
+        embeds: [errorEmbed(`Failed to set goodbye channel: ${err.message}`)],
         ephemeral: true,
       });
     }

@@ -141,10 +141,11 @@ module.exports = {
     }
 
     if (sub === 'get') {
+      // No permission check — any member can pick roles for themselves
       const getEmbed = new EmbedBuilder()
         .setTitle('🎭 Pick a Role')
         .setColor(config.color.primary || '#5865F2')
-        .setDescription('Select a role from the dropdown menu below to add it to your profile!')
+        .setDescription('Select a role from the dropdown menu below to add it to your profile!\n\nSelect a role again to **remove** it.')
         .setTimestamp();
 
       return interaction.reply({
