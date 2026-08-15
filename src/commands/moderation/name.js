@@ -23,9 +23,30 @@ module.exports = {
       return interaction.reply({ embeds: [errorEmbed('That member was not found in this server.')], ephemeral: true });
     }
 
-    if (!target.manageable && target.id !== interaction.guild.ownerId) {
+    if (target.id === interaction.guild.ownerId) {
       return interaction.reply({
-        embeds: [errorEmbed('I cannot change this member\'s nickname. They may have a higher role than me.')],
+        embeds: [
+          errorEmbed(
+            'Discord restricts bots from changing the **Server Owner\'s** nickname via the API. Server Owners must set their nickname manually!',
+            '👑 Server Owner Restriction'
+          ),
+        ],
+        ephemeral: true,
+      });
+    }
+
+    if (!target.manageable) {
+      return interaction.reply({
+        embeds: [
+          errorEmbed(
+            `I cannot change ${target}'s nickname because their role is higher than or equal to my role in the server settings hierarchy.\n\n` +
+            '**How to fix:**\n' +
+            '1. Go to **Server Settings ➔ Roles** in Discord.\n' +
+            '2. Drag the **`ZX Sync`** bot role up so it is above the member\'s highest role!\n' +
+            '3. Make sure the bot has the **Manage Nicknames** permission enabled.',
+            '⚠️ Role Hierarchy Limit'
+          ),
+        ],
         ephemeral: true,
       });
     }
