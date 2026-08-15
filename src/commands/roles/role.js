@@ -18,7 +18,6 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('role')
     .setDescription('Role management commands.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     // --- Subcommands ---
     .addSubcommand((sub) =>
       sub

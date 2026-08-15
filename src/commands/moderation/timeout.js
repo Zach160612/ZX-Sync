@@ -33,8 +33,7 @@ module.exports = {
     )
     .addStringOption((o) =>
       o.setName('reason').setDescription('Reason for the timeout').setRequired(false)
-    )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+    ),
 
   async execute(interaction) {
     if (!hasPermission(interaction.member)) return denyPermission(interaction);
@@ -65,6 +64,15 @@ module.exports = {
           ),
         ],
       }).catch(() => null);
+
+      const { logActivity } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
+      logActivity({
+        type: 'TIMEOUT',
+        user: { id: target.id, tag: target.user.tag },
+        moderator: { id: interaction.user.id, tag: interaction.user.tag },
+        reason,
+        details: `Duration: ${displayDuration}`,
+      });
 
       await interaction.reply({
         embeds: [

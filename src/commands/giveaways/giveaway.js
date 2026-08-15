@@ -99,7 +99,6 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('giveaway')
     .setDescription('Start a giveaway.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageEvents)
     .addStringOption((o) => o.setName('prize').setDescription('The prize').setRequired(true))
     .addStringOption((o) =>
       o.setName('duration').setDescription('Duration (e.g. 1h, 30m, 2d)').setRequired(true)

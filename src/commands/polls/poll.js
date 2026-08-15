@@ -15,7 +15,6 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('poll')
     .setDescription('Create a poll.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addStringOption((o) =>
       o.setName('question').setDescription('The poll question').setRequired(true)
     )

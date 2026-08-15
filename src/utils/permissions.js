@@ -16,13 +16,25 @@ function hasPermission(member) {
   // Server owner always has full access
   if (member.guild.ownerId === member.id) return true;
 
-  // Discord Administrator permission
   const { PermissionFlagsBits } = require('discord.js');
-  if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
+  
+  // Administrator or any staff/moderation permissions
+  if (
+    member.permissions.has(PermissionFlagsBits.Administrator) ||
+    member.permissions.has(PermissionFlagsBits.ManageGuild) ||
+    member.permissions.has(PermissionFlagsBits.BanMembers) ||
+    member.permissions.has(PermissionFlagsBits.KickMembers) ||
+    member.permissions.has(PermissionFlagsBits.ManageRoles) ||
+    member.permissions.has(PermissionFlagsBits.ManageChannels) ||
+    member.permissions.has(PermissionFlagsBits.ManageMessages) ||
+    member.permissions.has(PermissionFlagsBits.ModerateMembers)
+  ) {
+    return true;
+  }
 
-  // Configured staff roles
+  // Configured staff roles (matched by role name or role ID)
   const staffRoles = config.staffRoles || [];
-  return member.roles.cache.some((role) => staffRoles.includes(role.name));
+  return member.roles.cache.some((role) => staffRoles.includes(role.name) || staffRoles.includes(role.id));
 }
 
 /**

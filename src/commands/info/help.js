@@ -24,6 +24,7 @@ const CATEGORIES = [
       { name: '/purge', description: 'Bulk delete messages' },
       { name: '/lock', description: 'Lock a channel' },
       { name: '/unlock', description: 'Unlock a channel' },
+      { name: '/logs', description: 'View activity logs (joins, leaves, kicks, bans, warns)' },
     ],
     staffOnly: true,
   },

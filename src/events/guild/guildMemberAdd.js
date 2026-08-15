@@ -3,9 +3,39 @@ const path = require('path');
 const { generateWelcomeImage } = require(path.join(__dirname, '..', '..', 'utils', 'welcomeImage.js'));
 const config = require('../../../config.json');
 
+const { logAction, buildLogEmbed } = require(path.join(__dirname, '..', '..', 'utils', 'logger.js'));
+const { logActivity } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
+
 module.exports = {
   name: 'guildMemberAdd',
   async execute(member) {
+    // 1. Record activity log
+    logActivity({
+      type: 'JOIN',
+      user: { id: member.id, tag: member.user.tag || member.user.username },
+      details: `Member count now: ${member.guild.memberCount}`,
+    });
+
+    // 2. Log to staff audit log channel
+    try {
+      await logAction(
+        member.client,
+        buildLogEmbed({
+          title: '📥 Member Joined',
+          color: config.color.success || '#57F287',
+          description: `**${member.user.tag}** (${member.id}) has joined the server.`,
+          fields: [
+            { name: 'User', value: `${member.user.tag} (${member.id})`, inline: true },
+            { name: 'Total Members', value: `${member.guild.memberCount}`, inline: true },
+            { name: 'Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: false },
+          ],
+          thumbnail: member.user.displayAvatarURL({ dynamic: true }),
+        })
+      );
+    } catch (err) {
+      console.error('Error logging member join:', err.message);
+    }
+
     // Check if welcome system is enabled
     if (!config.welcomeEnabled) return;
 

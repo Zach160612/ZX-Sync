@@ -14,8 +14,7 @@ module.exports = {
     )
     .addStringOption((o) =>
       o.setName('reason').setDescription('Reason for the ban').setRequired(false)
-    )
-    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
+    ),
 
   async execute(interaction) {
     if (!hasPermission(interaction.member)) return denyPermission(interaction);
@@ -44,6 +43,14 @@ module.exports = {
       }).catch(() => null); // DM may fail if user has DMs off
 
       await target.ban({ reason: `${reason} | Banned by ${interaction.user.tag}` });
+
+      const { logActivity } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
+      logActivity({
+        type: 'BAN',
+        user: { id: target.id, tag: target.user.tag },
+        moderator: { id: interaction.user.id, tag: interaction.user.tag },
+        reason,
+      });
 
       await interaction.reply({
         embeds: [successEmbed(`**${target.user.tag}** has been banned.\n**Reason:** ${reason}`)],

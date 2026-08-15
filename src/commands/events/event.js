@@ -59,7 +59,6 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('event')
     .setDescription('Manage server events.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageEvents)
     .addSubcommand((sub) =>
       sub
         .setName('create')

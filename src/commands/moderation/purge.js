@@ -14,8 +14,7 @@ module.exports = {
         .setRequired(true)
         .setMinValue(1)
         .setMaxValue(100)
-    )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    ),
 
   async execute(interaction) {
     if (!hasPermission(interaction.member)) return denyPermission(interaction);

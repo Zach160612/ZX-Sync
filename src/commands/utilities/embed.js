@@ -16,7 +16,6 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('embed')
     .setDescription('Build and send a custom embed announcement.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addStringOption((o) => o.setName('title').setDescription('Embed title').setRequired(true))
     .addStringOption((o) => o.setName('description').setDescription('Embed body text').setRequired(true))
     .addStringOption((o) => o.setName('color').setDescription('Hex color (e.g. #5865F2)').setRequired(false))

@@ -13,8 +13,7 @@ module.exports = {
         .setDescription('Channel to unlock (defaults to current channel)')
         .addChannelTypes(ChannelType.GuildText)
         .setRequired(false)
-    )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+    ),
 
   async execute(interaction) {
     if (!hasPermission(interaction.member)) return denyPermission(interaction);

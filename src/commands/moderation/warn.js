@@ -57,6 +57,15 @@ module.exports = {
       ],
     }).catch(() => null);
 
+    const { logActivity } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
+    logActivity({
+      type: 'WARN',
+      user: { id: target.id, tag: target.user.tag },
+      moderator: { id: interaction.user.id, tag: interaction.user.tag },
+      reason,
+      details: `Total warnings: ${warningCount}`,
+    });
+
     await interaction.reply({
       embeds: [
         successEmbed(
