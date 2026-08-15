@@ -112,7 +112,8 @@ module.exports = {
       // Group entries by type for user ID searches so it's easy to read
       const logLines = logs.map((item) => {
         const icon          = TYPE_ICONS[item.type] || '📌';
-        const timeFormatted = `<t:${Math.floor(item.timestamp / 1000)}:R>`;
+        const ts            = Math.floor(item.timestamp / 1000);
+        const timeFormatted = `<t:${ts}:F> (<t:${ts}:R>)`;
         const userStr       = item.user ? `**${item.user.tag}** (\`${item.user.id}\`)` : 'Unknown User';
         const modStr        = item.moderator ? ` · by **${item.moderator.tag}**` : '';
         const reasonStr     = item.reason   ? `\n  └ Reason: *${item.reason}*`   : '';
