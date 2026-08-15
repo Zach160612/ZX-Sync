@@ -9,7 +9,8 @@
     "warning": "#FEE75C",
     "info": "#5865F2"
   },
-  "staffRoles": ["👑 Server Owner", "🛡️ Admin", "🔨 Moderator"],
+  "welcomeEnabled": true,
+  "welcomeType": "text",
   "channels": {
     "log": "LOG_CHANNEL_ID_HERE"
   },

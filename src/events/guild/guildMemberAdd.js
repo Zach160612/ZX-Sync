@@ -36,40 +36,62 @@ module.exports = {
       console.error('Error logging member join:', err.message);
     }
 
-    // Check if welcome system is enabled
-    if (!config.welcomeEnabled) return;
+    // 3. Check if welcome system is enabled
+    if (config.welcomeEnabled === false) return;
 
-    // Check if welcome channel is configured
-    if (!config.channels || !config.channels.welcome) return;
+    // 4. Auto-resolve welcome channel (configured ID or any text channel named welcome/general)
+    let welcomeChannel = null;
+    if (config.channels && config.channels.welcome) {
+      welcomeChannel = member.guild.channels.cache.get(config.channels.welcome);
+    }
 
-    const welcomeChannel = member.guild.channels.cache.get(config.channels.welcome);
+    if (!welcomeChannel) {
+      welcomeChannel = member.guild.channels.cache.find(
+        (ch) => ch.isTextBased() && (ch.name.includes('welcome') || ch.name.includes('general'))
+      );
+    }
+
     if (!welcomeChannel) return;
 
     try {
-      const welcomeType = config.welcomeType || 'image';
+      const welcomeType = config.welcomeType || 'text';
       const welcomeMessage = config.welcomeMessage || `Welcome to **${member.guild.name}**! We're glad you're here.`;
 
       if (welcomeType === 'image') {
-        // Generate welcome image
-        const imageBuffer = await generateWelcomeImage(member, member.guild.name);
-        const attachment = new AttachmentBuilder(imageBuffer, { name: 'welcome.png' });
+        try {
+          // Generate welcome image
+          const imageBuffer = await generateWelcomeImage(member, member.guild.name);
+          const attachment = new AttachmentBuilder(imageBuffer, { name: 'welcome.png' });
 
-        // Create welcome embed with image
-        const embed = new EmbedBuilder()
-          .setTitle(`👋 Welcome ${member.user.username}!`)
-          .setColor(config.color.primary)
-          .setDescription(welcomeMessage)
-          .setImage('attachment://welcome.png')
-          .setTimestamp()
-          .setFooter({ text: `Member #${member.guild.memberCount}` });
+          const embed = new EmbedBuilder()
+            .setTitle(`👋 Welcome ${member.user.username}!`)
+            .setColor(config.color.primary || '#5865F2')
+            .setDescription(welcomeMessage)
+            .setImage('attachment://welcome.png')
+            .setTimestamp()
+            .setFooter({ text: `Member #${member.guild.memberCount}` });
 
-        await welcomeChannel.send({ embeds: [embed], files: [attachment] });
+          await welcomeChannel.send({ embeds: [embed], files: [attachment] });
+        } catch (imgErr) {
+          console.error('Image generation failed, falling back to text welcome embed:', imgErr.message);
+          // Fallback to text embed
+          const embed = new EmbedBuilder()
+            .setTitle(`👋 Welcome to ${member.guild.name}, ${member.user.username}!`)
+            .setColor(config.color.primary || '#5865F2')
+            .setDescription(welcomeMessage)
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+            .setTimestamp()
+            .setFooter({ text: `Member #${member.guild.memberCount}` });
+
+          await welcomeChannel.send({ embeds: [embed] });
+        }
       } else {
         // Text-only welcome message
         const embed = new EmbedBuilder()
-          .setTitle(`👋 Welcome ${member.user.username}!`)
-          .setColor(config.color.primary)
+          .setTitle(`👋 Welcome to ${member.guild.name}, ${member.user.username}!`)
+          .setColor(config.color.primary || '#5865F2')
           .setDescription(welcomeMessage)
+          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
           .setTimestamp()
           .setFooter({ text: `Member #${member.guild.memberCount}` });
 
@@ -84,7 +106,7 @@ module.exports = {
         }
       }
     } catch (err) {
-      console.error('Error sending welcome message:', err);
+      console.error('Error sending welcome message:', err.message);
     }
   },
 };

@@ -14,30 +14,38 @@ module.exports = {
       details: `Member count now: ${member.guild.memberCount}`,
     });
 
-    // 2. Goodbye channel message (if configured or welcome channel used)
-    const goodbyeChannelId = (config.channels && (config.channels.goodbye || config.channels.welcome)) || null;
-    
-    if (goodbyeChannelId) {
-      const goodbyeChannel = member.guild.channels.cache.get(goodbyeChannelId);
-      if (goodbyeChannel) {
-        try {
-          const goodbyeMessage = config.goodbyeMessage || `**${member.user.username}** has left the server. We'll miss you! 👋`;
+    // 2. Auto-resolve goodbye/welcome channel
+    let goodbyeChannel = null;
+    if (config.channels && config.channels.goodbye) {
+      goodbyeChannel = member.guild.channels.cache.get(config.channels.goodbye);
+    }
+    if (!goodbyeChannel && config.channels && config.channels.welcome) {
+      goodbyeChannel = member.guild.channels.cache.get(config.channels.welcome);
+    }
+    if (!goodbyeChannel) {
+      goodbyeChannel = member.guild.channels.cache.find(
+        (ch) => ch.isTextBased() && (ch.name.includes('welcome') || ch.name.includes('goodbye') || ch.name.includes('general'))
+      );
+    }
 
-          const embed = new EmbedBuilder()
-            .setTitle(`👋 Goodbye ${member.user.username}`)
-            .setColor(config.color.warning || config.color.error || '#ED4245')
-            .setDescription(goodbyeMessage)
-            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-            .addFields(
-              { name: 'Member Count', value: `${member.guild.memberCount}`, inline: true },
-              { name: 'User Tag', value: `${member.user.tag}`, inline: true }
-            )
-            .setTimestamp();
+    if (goodbyeChannel) {
+      try {
+        const goodbyeMessage = config.goodbyeMessage || `**${member.user.username}** has left the server. We'll miss you! 👋`;
 
-          await goodbyeChannel.send({ embeds: [embed] });
-        } catch (err) {
-          console.error('Error sending goodbye message:', err.message);
-        }
+        const embed = new EmbedBuilder()
+          .setTitle(`👋 Goodbye ${member.user.username}`)
+          .setColor(config.color.warning || config.color.error || '#ED4245')
+          .setDescription(goodbyeMessage)
+          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+          .addFields(
+            { name: 'Member Count', value: `${member.guild.memberCount}`, inline: true },
+            { name: 'User Tag', value: `${member.user.tag}`, inline: true }
+          )
+          .setTimestamp();
+
+        await goodbyeChannel.send({ embeds: [embed] });
+      } catch (err) {
+        console.error('Error sending goodbye message:', err.message);
       }
     }
 
