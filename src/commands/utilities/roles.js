@@ -17,7 +17,10 @@ const config = require('../../../config.json');
  */
 function getNormalRoles(guild) {
   const staffRoleNames = (config.staffRoles || []).map((r) => r.toLowerCase());
-  const restrictedKeywords = ['admin', 'owner', 'mod', 'staff', 'clanker', 'bot', 'system'];
+  const restrictedKeywords = [
+    'admin', 'owner', 'mod', 'staff', 'clanker', 'bot', 'system',
+    'big booty', 'stripper', 'german', 'saxon', 'the goat', 'welsh', 'custom'
+  ];
 
   return guild.roles.cache
     .filter((role) => {
@@ -36,6 +39,11 @@ function getNormalRoles(guild) {
 
       // 4. Exclude roles matching restricted keywords
       if (restrictedKeywords.some((keyword) => lowerName.includes(keyword))) {
+        return false;
+      }
+
+      // 5. Exclude custom created roles (flagged or starting with ⭐ or ✨)
+      if (lowerName.includes('custom') || role.name.includes('⭐') || role.name.includes('✨')) {
         return false;
       }
 

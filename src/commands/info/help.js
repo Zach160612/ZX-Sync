@@ -66,6 +66,7 @@ const CATEGORIES = [
   {
     name: '🛠️ Utilities',
     commands: [
+      { name: '/customrole', description: 'Request a custom role in your own name and color' },
       { name: '/poll', description: 'Create a poll' },
       { name: '/giveaway', description: 'Start a giveaway' },
       { name: '/embed', description: 'Build a custom embed announcement' },

@@ -52,6 +52,91 @@ module.exports = {
     if (interaction.isButton()) {
       const { customId } = interaction;
 
+      // ── Custom Role Finish / Cancel ──
+      if (customId.startsWith('custom_role_')) {
+        const parts = customId.split('_');
+        const action = parts[2]; // finish or cancel
+        const ticketId = parts[3];
+
+        const customRoleRequests = readData('custom_roles.json');
+        const requestData = customRoleRequests[ticketId];
+
+        if (action === 'cancel') {
+          if (!hasPermission(interaction.member) && interaction.user.id !== requestData?.userId) {
+            return interaction.reply({ content: '❌ You cannot cancel this request.', ephemeral: true });
+          }
+
+          await interaction.reply({ content: '🗑️ Request cancelled. Closing channel in 5 seconds...' });
+          setTimeout(() => {
+            interaction.channel.delete().catch(() => null);
+          }, 5000);
+          return;
+        }
+
+        if (action === 'finish') {
+          // Only Staff / Owner can click finish
+          if (!hasPermission(interaction.member)) {
+            return interaction.reply({
+              content: '❌ Only Staff or the Server Owner can click Finish & Grant Role.',
+              ephemeral: true,
+            });
+          }
+
+          await interaction.deferReply();
+
+          try {
+            const guild = interaction.guild;
+            const member = await guild.members.fetch(requestData ? requestData.userId : interaction.user.id).catch(() => null);
+
+            if (!member) {
+              return interaction.editReply({ content: '❌ Member who requested this role could not be found.' });
+            }
+
+            const roleName = requestData ? requestData.roleName : 'Custom Role';
+            let roleColor = requestData ? requestData.roleColor : '#5865F2';
+
+            // Clean hex color
+            if (roleColor && !roleColor.startsWith('#') && !isNaN(parseInt(roleColor, 16))) {
+              roleColor = `#${roleColor}`;
+            }
+
+            // Create custom role (prefix with ⭐ to automatically exclude from /roles get dropdown)
+            const role = await guild.roles.create({
+              name: `⭐ ${roleName}`,
+              color: roleColor,
+              reason: `Custom role created for ${member.user.tag} by ${interaction.user.tag}`,
+            });
+
+            // Assign to user
+            await member.roles.add(role, 'Custom role request fulfilled');
+
+            await interaction.editReply({
+              content: `🎉 Successfully created and granted **${role.name}** to ${member}! Closing chat in 5 seconds...`,
+            });
+
+            // Log action
+            const { logAction, buildLogEmbed } = require('../../utils/logger');
+            await logAction(
+              interaction.client,
+              buildLogEmbed({
+                title: '✨ Custom Role Granted & Ticket Closed',
+                color: config.color.success,
+                description: `Role **${role.name}** granted to **${member.user.tag}** by ${interaction.user.tag}.`,
+              })
+            );
+
+            // Delete channel after 5 seconds
+            setTimeout(() => {
+              interaction.channel.delete().catch(() => null);
+            }, 5000);
+          } catch (err) {
+            console.error('[CustomRoleFinish]', err.message);
+            await interaction.editReply({ content: `❌ Failed to create/grant custom role: ${err.message}` });
+          }
+          return;
+        }
+      }
+
       // ── Event RSVP Buttons ──
       if (customId.startsWith('event_')) {
         const parts = customId.split('_');
