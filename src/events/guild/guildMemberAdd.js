@@ -98,11 +98,16 @@ module.exports = {
         await welcomeChannel.send({ embeds: [embed] });
       }
 
-      // Auto-role if configured
-      if (config.autoRole) {
-        const role = member.guild.roles.cache.get(config.autoRole);
+      // Auto-role assignment
+      const autoRolesList = Array.isArray(config.autoRoles) && config.autoRoles.length > 0
+        ? config.autoRoles
+        : (config.autoRole ? [config.autoRole] : []);
+
+      for (const roleKey of autoRolesList) {
+        if (!roleKey) continue;
+        const role = member.guild.roles.cache.get(roleKey) || member.guild.roles.cache.find((r) => r.name.toLowerCase() === roleKey.toLowerCase());
         if (role) {
-          await member.roles.add(role, 'Auto-role on join');
+          await member.roles.add(role, 'Auto-role on join').catch((err) => console.error(`Failed to assign auto-role ${role.name}:`, err.message));
         }
       }
     } catch (err) {
