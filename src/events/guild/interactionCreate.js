@@ -168,6 +168,54 @@ module.exports = {
     // SELECT MENU INTERACTIONS
     // ═══════════════════════════════════════════
     if (interaction.isStringSelectMenu()) {
+      // ── Self Role Selection ──
+      if (interaction.customId === 'self_role_select') {
+        const roleId = interaction.values[0];
+        const role = interaction.guild.roles.cache.get(roleId);
+
+        if (!role) {
+          return interaction.reply({
+            content: '❌ That role no longer exists in this server.',
+            ephemeral: true,
+          });
+        }
+
+        const member = interaction.member;
+        const hasRole = member.roles.cache.has(role.id);
+
+        try {
+          if (hasRole) {
+            await member.roles.remove(role, 'Self-role selector');
+            return interaction.reply({
+              embeds: [
+                new EmbedBuilder()
+                  .setColor(config.color.warning || '#FEE75C')
+                  .setDescription(`ℹ️ Removed the **${role.name}** role from your profile.`)
+                  .setTimestamp(),
+              ],
+              ephemeral: true,
+            });
+          } else {
+            await member.roles.add(role, 'Self-role selector');
+            return interaction.reply({
+              embeds: [
+                new EmbedBuilder()
+                  .setColor(config.color.success || '#57F287')
+                  .setDescription(`🎉 You got the **${role.name}** role!`)
+                  .setTimestamp(),
+              ],
+              ephemeral: true,
+            });
+          }
+        } catch (err) {
+          console.error('[SelfRoleSelect]', err.message);
+          return interaction.reply({
+            content: `❌ Could not update your role: ${err.message}`,
+            ephemeral: true,
+          });
+        }
+      }
+
       // ── Ticket Creation ──
       if (interaction.customId === 'ticket_create') {
         const category = interaction.values[0];

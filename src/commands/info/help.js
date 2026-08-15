@@ -39,6 +39,8 @@ const CATEGORIES = [
       { name: '/autorole add', description: 'Add a role to auto-assign on join' },
       { name: '/autorole remove', description: 'Remove a role from auto-assign' },
       { name: '/autorole list', description: 'List all auto-assigned roles' },
+      { name: '/roles panel', description: 'Post self-role dropdown panel in channel' },
+      { name: '/roles get', description: 'Open self-role selector for yourself' },
     ],
     staffOnly: true,
   },
