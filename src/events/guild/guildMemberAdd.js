@@ -5,6 +5,7 @@ const config = require('../../../config.json');
 
 const { logAction, buildLogEmbed } = require(path.join(__dirname, '..', '..', 'utils', 'logger.js'));
 const { logActivity } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
+const { getUserLevel, getLevelInfo } = require(path.join(__dirname, '..', '..', 'utils', 'levelSystem.js'));
 
 module.exports = {
   name: 'guildMemberAdd',
@@ -109,6 +110,18 @@ module.exports = {
         if (role) {
           await member.roles.add(role, 'Auto-role on join').catch((err) => console.error(`Failed to assign auto-role ${role.name}:`, err.message));
         }
+      }
+
+      // Set nickname with level emoji
+      try {
+        const level = getUserLevel(member);
+        const levelInfo = getLevelInfo(level);
+        const newNick = `${levelInfo.emoji} ${member.user.username}`;
+        if (member.manageable) {
+          await member.setNickname(newNick).catch(() => {}); // Silently fail if no permission
+        }
+      } catch (err) {
+        console.error('Failed to set level nickname:', err.message);
       }
     } catch (err) {
       console.error('Error sending welcome message:', err.message);

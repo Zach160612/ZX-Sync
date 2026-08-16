@@ -12,10 +12,22 @@ module.exports = {
     console.log(`\n✅ ${client.user.tag} is online and ready!`);
     console.log(`   Serving ${client.guilds.cache.size} guild(s)\n`);
 
+    // Set presence to ensure bot shows online in all servers
     client.user.setPresence({
       status: 'online',
       activities: [{ name: '/help | ZX Sync', type: 0 }],
     });
+    
+    console.log(`[Presence] Bot presence set to online with activity`);
+    
+    // Force presence update after a short delay to ensure it takes effect
+    setTimeout(() => {
+      client.user.setPresence({
+        status: 'online',
+        activities: [{ name: '/help | ZX Sync', type: 0 }],
+      });
+      console.log(`[Presence] Bot presence force-updated`);
+    }, 5000);
 
     // ── Restore pending giveaway timers ──
     const giveaways = readData('giveaways.json');

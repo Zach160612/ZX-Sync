@@ -95,7 +95,7 @@ module.exports = {
     // ─── 6. Log channel ────────────────────────────────────────────
     results.push(await runTest('Log/audit channel configured', () => {
       const id = config.channels?.log;
-      if (!id || id === 'LOG_CHANNEL_ID_HERE') return 'Not set — configure config.channels.log';
+      if (!id || id === 'LOG_CHANNEL_ID_HERE') return true; // Optional - not configured is OK
       const ch = guild.channels.cache.get(id);
       if (!ch) return `Log channel ID ${id} not found`;
       return true;
@@ -132,6 +132,7 @@ module.exports = {
     // ─── 10. Auto-roles ────────────────────────────────────────────
     results.push(await runTest('Auto-role config valid', () => {
       const autoRoles = readData('autoroles.json');
+      if (!autoRoles || typeof autoRoles !== 'object') return 'No auto-roles set — use /autorole add to configure';
       const roleIds = autoRoles[guild.id] || [];
       if (!Array.isArray(roleIds) || roleIds.length === 0) return 'No auto-roles set — use /autorole add to configure';
       const invalid = roleIds.filter((id) => !guild.roles.cache.has(id));
@@ -160,7 +161,7 @@ module.exports = {
         return true;
       });
       if (normalRoles.size === 0) return 'No self-assignable roles found — create roles for /roles panel';
-      return `${normalRoles.size} role(s) visible in /roles`;
+      return true;
     }));
 
     // ─── 12. Bot can send embeds ───────────────────────────────────
@@ -176,7 +177,7 @@ module.exports = {
     results.push(await runTest('All commands registered', () => {
       const count = interaction.client.commands?.size || 0;
       if (count === 0) return 'No commands found in client cache';
-      return `${count} command(s) registered`;
+      return true;
     }));
 
     // ─── Build summary embed ──────────────────────────────────────
