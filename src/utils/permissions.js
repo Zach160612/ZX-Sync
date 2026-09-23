@@ -1,5 +1,5 @@
 const config = require('../../config.json');
-const { getUserLevel } = require('./levelSystem.js');
+const { getUserLevel, hasManualLevelAssignment } = require('./levelSystem.js');
 
 const LEVELS = {
   1: { name: 'Owner', color: '#FFD700', emoji: '👑' },
@@ -39,17 +39,27 @@ function hasPermission(member) {
     return true;
   }
 
-  // If level is 4 (Member), deny access regardless of Discord permissions
-  if (userLevel === 4) {
-    console.log(`[Permissions] ${member.user.tag} is Member level - DENIED`);
+  // Only hard-deny manually assigned Members; default Members can still match Discord/staff roles
+  if (userLevel === 4 && hasManualLevelAssignment(member)) {
+    console.log(`[Permissions] ${member.user.tag} is manually assigned Member level - DENIED`);
     return false;
   }
 
-  // Fallback to Discord permissions for users without level assigned
+  // Fallback to Discord permissions for users without staff level
   const { PermissionFlagsBits } = require('discord.js');
-  
+
   if (member.permissions.has(PermissionFlagsBits.Administrator)) {
     console.log(`[Permissions] ${member.user.tag} has Administrator - GRANTED`);
+    return true;
+  }
+
+  if (member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
+    console.log(`[Permissions] ${member.user.tag} has Moderate Members - GRANTED`);
+    return true;
+  }
+
+  if (member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+    console.log(`[Permissions] ${member.user.tag} has Manage Server - GRANTED`);
     return true;
   }
 

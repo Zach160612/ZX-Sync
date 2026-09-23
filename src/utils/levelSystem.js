@@ -45,6 +45,16 @@ function getUserLevel(member) {
 }
 
 /**
+ * @param {import('discord.js').GuildMember} member
+ * @returns {boolean}
+ */
+function hasManualLevelAssignment(member) {
+  const levels = readData('levels.json') || {};
+  const guildLevels = levels[member.guild.id] || {};
+  return Boolean(guildLevels[member.id]);
+}
+
+/**
  * Get level information for a specific level number
  * @param {number} level 
  * @returns {object} Level information
@@ -80,5 +90,6 @@ module.exports = {
   getLevelInfo,
   hasLevel,
   formatUserWithLevel,
+  hasManualLevelAssignment,
   LEVELS
 };

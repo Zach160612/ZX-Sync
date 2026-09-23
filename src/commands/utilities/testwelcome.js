@@ -18,7 +18,7 @@ module.exports = {
       console.log('Starting welcome image generation for:', interaction.user.username);
       
       // Generate welcome image for the current user
-      const imageBuffer = await generateWelcomeImage(interaction.member, interaction.guild.name);
+      const imageBuffer = await generateWelcomeImage(interaction.member, interaction.guild.name, config.welcomeImageUrl);
       console.log('Image generated successfully');
       
       const attachment = new AttachmentBuilder(imageBuffer, { name: 'welcome.png' });

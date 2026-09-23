@@ -5,6 +5,8 @@ const { successEmbed, errorEmbed } = require(path.join(__dirname, '..', '..', 'u
 const { logAction, buildLogEmbed } = require(path.join(__dirname, '..', '..', 'utils', 'logger.js'));
 const config = require('../../../config.json');
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
 // --- TEMPLATE DEFINITIONS ---
 const TEMPLATES = {
   gaming: {
@@ -56,7 +58,7 @@ const TEMPLATES = {
           { name: '🏆・Tournament Room', type: ChannelType.GuildVoice },
           { name: '📖・Study & Work', type: ChannelType.GuildVoice },
           { name: '🎭・Event Space', type: ChannelType.GuildVoice },
-          { name: '🧍・avatar-creating', type: ChannelType.GuildVoice },
+          { name: '🔊・Gaming Lounge 2', type: ChannelType.GuildVoice },
         ],
       },
       {
@@ -277,43 +279,67 @@ module.exports = {
     try {
       const guild = interaction.guild;
       let createdCount = 0;
+      let failedCount = 0;
 
       // 1. Create Top Channels (without category)
       if (selectedTemplate.topChannels) {
         for (const ch of selectedTemplate.topChannels) {
-          await guild.channels.create({
-            name: ch.name,
-            type: ch.type,
-            reason: `Template setup by ${interaction.user.tag}`,
-          });
-          createdCount++;
+          try {
+            await sleep(350); // Pause to prevent Discord 429 rate limiting
+            await guild.channels.create({
+              name: ch.name,
+              type: ch.type,
+              reason: `Template setup by ${interaction.user.tag}`,
+            });
+            createdCount++;
+          } catch (chErr) {
+            console.error(`Failed creating top channel ${ch.name}:`, chErr.message);
+            failedCount++;
+          }
         }
       }
 
       // 2. Create Categories and their Channels
       for (const catDef of selectedTemplate.categories) {
-        const category = await guild.channels.create({
-          name: catDef.name,
-          type: ChannelType.GuildCategory,
-          reason: `Template setup by ${interaction.user.tag}`,
-        });
-        createdCount++;
-
-        for (const chDef of catDef.channels) {
-          await guild.channels.create({
-            name: chDef.name,
-            type: chDef.type,
-            parent: category.id,
+        let category = null;
+        try {
+          await sleep(350); // Pause to prevent Discord 429 rate limiting
+          category = await guild.channels.create({
+            name: catDef.name,
+            type: ChannelType.GuildCategory,
             reason: `Template setup by ${interaction.user.tag}`,
           });
           createdCount++;
+        } catch (catErr) {
+          console.error(`Failed creating category ${catDef.name}:`, catErr.message);
+          failedCount++;
+        }
+
+        for (const chDef of catDef.channels) {
+          try {
+            await sleep(350); // Pause to prevent Discord 429 rate limiting
+            await guild.channels.create({
+              name: chDef.name,
+              type: chDef.type,
+              parent: category ? category.id : undefined,
+              reason: `Template setup by ${interaction.user.tag}`,
+            });
+            createdCount++;
+          } catch (chErr) {
+            console.error(`Failed creating channel ${chDef.name}:`, chErr.message);
+            failedCount++;
+          }
         }
       }
+
+      const statusDetail = failedCount > 0
+        ? `Created **${createdCount}** channels/categories (${failedCount} skipped due to server limits/errors).`
+        : `Successfully created **${selectedTemplate.name}** layout with **${createdCount}** channels and categories.`;
 
       const replyEmbed = new EmbedBuilder()
         .setTitle('✅ Server Template Applied!')
         .setColor(config.color.success || '#57F287')
-        .setDescription(`Successfully created **${selectedTemplate.name}** layout with **${createdCount}** channels and categories.`)
+        .setDescription(statusDetail)
         .setFooter({ text: `Action performed by ${interaction.user.tag}` })
         .setTimestamp();
 
@@ -337,3 +363,4 @@ module.exports = {
     }
   },
 };
+

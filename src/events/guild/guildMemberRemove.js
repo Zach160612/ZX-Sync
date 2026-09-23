@@ -1,5 +1,6 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const path = require('path');
+const { generateGoodbyeImage } = require(path.join(__dirname, '..', '..', 'utils', 'welcomeImage.js'));
 const { logAction, buildLogEmbed } = require(path.join(__dirname, '..', '..', 'utils', 'logger.js'));
 const { logActivity } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
 const config = require('../../../config.json');
@@ -30,20 +31,58 @@ module.exports = {
 
     if (goodbyeChannel) {
       try {
-        const goodbyeMessage = config.goodbyeMessage || `**${member.user.username}** has left the server. We'll miss you! 👋`;
+        const goodbyeType = config.goodbyeType || 'image';
+        const rawMessage = config.goodbyeMessage || `**{user}** has left {server}. We wish you all the best in your tech journey! 👋`;
+        const goodbyeMessage = rawMessage
+          .replace(/\{user\}/g, `<@${member.id}>`)
+          .replace(/\{username\}/g, member.user.username)
+          .replace(/\{userTag\}/g, member.user.tag || member.user.username)
+          .replace(/\{server\}/g, member.guild.name)
+          .replace(/\{memberCount\}/g, member.guild.memberCount);
 
-        const embed = new EmbedBuilder()
-          .setTitle(`👋 Goodbye ${member.user.username}`)
-          .setColor(config.color.warning || config.color.error || '#ED4245')
-          .setDescription(goodbyeMessage)
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-          .addFields(
-            { name: 'Member Count', value: `${member.guild.memberCount}`, inline: true },
-            { name: 'User Tag', value: `${member.user.tag}`, inline: true }
-          )
-          .setTimestamp();
+        if (goodbyeType === 'image') {
+          try {
+            const imageBuffer = await generateGoodbyeImage(member, member.guild.name, config.goodbyeImageUrl);
+            const attachment = new AttachmentBuilder(imageBuffer, { name: 'goodbye.png' });
 
-        await goodbyeChannel.send({ embeds: [embed] });
+            const embed = new EmbedBuilder()
+              .setTitle(`👋 Goodbye ${member.user.username}`)
+              .setColor(config.color.warning || config.color.error || '#ED4245')
+              .setDescription(goodbyeMessage)
+              .setImage('attachment://goodbye.png')
+              .setTimestamp()
+              .setFooter({ text: `Member #${member.guild.memberCount}` });
+
+            await goodbyeChannel.send({ embeds: [embed], files: [attachment] });
+          } catch (imgErr) {
+            console.error('Goodbye image generation failed, falling back to text embed:', imgErr.message);
+            const embed = new EmbedBuilder()
+              .setTitle(`👋 Goodbye ${member.user.username}`)
+              .setColor(config.color.warning || config.color.error || '#ED4245')
+              .setDescription(goodbyeMessage)
+              .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+              .addFields(
+                { name: 'Member Count', value: `${member.guild.memberCount}`, inline: true },
+                { name: 'User Tag', value: `${member.user.tag || member.user.username}`, inline: true }
+              )
+              .setTimestamp();
+
+            await goodbyeChannel.send({ embeds: [embed] });
+          }
+        } else {
+          const embed = new EmbedBuilder()
+            .setTitle(`👋 Goodbye ${member.user.username}`)
+            .setColor(config.color.warning || config.color.error || '#ED4245')
+            .setDescription(goodbyeMessage)
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+            .addFields(
+              { name: 'Member Count', value: `${member.guild.memberCount}`, inline: true },
+              { name: 'User Tag', value: `${member.user.tag || member.user.username}`, inline: true }
+            )
+            .setTimestamp();
+
+          await goodbyeChannel.send({ embeds: [embed] });
+        }
       } catch (err) {
         console.error('Error sending goodbye message:', err.message);
       }

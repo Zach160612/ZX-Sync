@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "deploy": "node deploy-global.js",
+    "invite": "node generate-invite.js",
     "clear-guild": "node clear-guild-commands.js",
     "test": "node test.js"
   },

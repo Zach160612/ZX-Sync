@@ -151,7 +151,7 @@ async function runTests() {
     }
   });
 
-  // ─── 9. Welcome image generation ────────────────────────────
+  // ─── 9. Welcome & Goodbye image generation ──────────────────
   await runTest('Welcome image generation', async () => {
     try {
       const { generateWelcomeImage } = require('./src/utils/welcomeImage');
@@ -169,6 +169,37 @@ async function runTests() {
       return true;
     } catch (err) {
       return `Welcome image generation failed: ${err.message}`;
+    }
+  });
+
+  await runTest('Goodbye image generation', async () => {
+    try {
+      const { generateGoodbyeImage } = require('./src/utils/welcomeImage');
+      
+      const dummyMember = {
+        user: {
+          username: 'TestUser',
+          displayAvatarURL: () => 'https://cdn.discordapp.com/embed/avatars/0.png',
+        },
+        guild: { memberCount: 100 },
+      };
+      
+      const buf = await generateGoodbyeImage(dummyMember, 'Test Server');
+      if (!buf || buf.length < 1000) return 'Goodbye image generated but looks too small';
+      return true;
+    } catch (err) {
+      return `Goodbye image generation failed: ${err.message}`;
+    }
+  });
+
+  await runTest('Setup command structure', () => {
+    try {
+      const setupCmd = require('./src/commands/utilities/setup');
+      if (!setupCmd.data || setupCmd.data.name !== 'setup') return 'Setup command missing data or invalid name';
+      if (typeof setupCmd.execute !== 'function') return 'Setup command missing execute method';
+      return true;
+    } catch (err) {
+      return `Setup command test failed: ${err.message}`;
     }
   });
 

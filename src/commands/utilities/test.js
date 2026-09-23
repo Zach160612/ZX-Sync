@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const path = require('path');
 const { hasPermission, denyPermission } = require(path.join(__dirname, '..', '..', 'utils', 'permissions.js'));
-const { generateWelcomeImage } = require(path.join(__dirname, '..', '..', 'utils', 'welcomeImage.js'));
+const { generateWelcomeImage, generateGoodbyeImage } = require(path.join(__dirname, '..', '..', 'utils', 'welcomeImage.js'));
 const { getActivities } = require(path.join(__dirname, '..', '..', 'utils', 'activityLogger.js'));
 const { readData } = require(path.join(__dirname, '..', '..', 'utils', 'dataStore.js'));
 const config = require('../../../config.json');
@@ -101,8 +101,8 @@ module.exports = {
       return true;
     }));
 
-    // ─── 7. Welcome image generation ──────────────────────────────
-    results.push(await runTest('Welcome image generator', async () => {
+    // ─── 7. Welcome & Goodbye image generation ─────────────────────
+    results.push(await runTest('Welcome & Goodbye image generators', async () => {
       const dummyMember = {
         user: {
           username: 'TestUser',
@@ -110,8 +110,11 @@ module.exports = {
         },
         guild: { memberCount: guild.memberCount },
       };
-      const buf = await generateWelcomeImage(dummyMember, guild.name);
-      if (!buf || buf.length < 1000) return 'Image generated but looks too small';
+      const welcomeBuf = await generateWelcomeImage(dummyMember, guild.name, config.welcomeImageUrl);
+      const goodbyeBuf = await generateGoodbyeImage(dummyMember, guild.name, config.goodbyeImageUrl);
+      if (!welcomeBuf || welcomeBuf.length < 1000 || !goodbyeBuf || goodbyeBuf.length < 1000) {
+        return 'Card image generated but output looks truncated';
+      }
       return true;
     }));
 

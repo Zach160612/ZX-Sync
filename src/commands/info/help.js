@@ -14,6 +14,13 @@ const CATEGORIES = [
     staffOnly: false,
   },
   {
+    name: '🎭 Member Commands',
+    commands: [
+      { name: '/roles get', description: 'Pick normal community roles for yourself' },
+    ],
+    staffOnly: false,
+  },
+  {
     name: '🔨 Moderation',
     commands: [
       { name: '/ban', description: 'Ban a member from the server' },
@@ -40,7 +47,6 @@ const CATEGORIES = [
       { name: '/autorole remove', description: 'Remove a role from auto-assign' },
       { name: '/autorole list', description: 'List all auto-assigned roles' },
       { name: '/roles panel', description: 'Post self-role dropdown panel in channel' },
-      { name: '/roles get', description: 'Open self-role selector for yourself' },
     ],
     staffOnly: true,
   },
@@ -71,8 +77,10 @@ const CATEGORIES = [
       { name: '/giveaway', description: 'Start a giveaway' },
       { name: '/embed', description: 'Build a custom embed announcement' },
       { name: '/template', description: 'Apply a server structure template (Gaming, School, Roleplay, Work)' },
-      { name: '/welcome', description: 'Set the channel where welcome messages are sent' },
-      { name: '/goodbye', description: 'Set the channel where goodbye messages are sent' },
+      { name: '/welcome', description: 'Configure welcome channel, custom background image, format & message' },
+      { name: '/goodbye', description: 'Configure goodbye channel, custom background image, format & message' },
+      { name: '/testwelcome', description: 'Test & preview welcome banner card' },
+      { name: '/testgoodbye', description: 'Test & preview goodbye banner card' },
     ],
     staffOnly: true,
   },

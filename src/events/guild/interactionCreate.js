@@ -9,7 +9,8 @@ const {
 } = require('discord.js');
 const path = require('path');
 const { readData, writeData } = require('../../utils/dataStore');
-const { hasPermission } = require('../../utils/permissions');
+const { hasPermission, denyPermission } = require('../../utils/permissions');
+const { isPublicCommand } = require('../../utils/commandAccess');
 const config = require('../../../config.json');
 
 // ─── Ticket category labels ───────────────────────────────────
@@ -31,6 +32,11 @@ module.exports = {
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
       if (!command) return;
+
+      const subcommand = interaction.options.getSubcommand(false);
+      if (!isPublicCommand(interaction.commandName, subcommand) && !hasPermission(interaction.member)) {
+        return denyPermission(interaction);
+      }
 
       try {
         await command.execute(interaction);

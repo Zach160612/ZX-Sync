@@ -2,6 +2,7 @@ require('dotenv').config();
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { applyDeployPermissions } = require('./src/utils/commandAccess');
 
 const commands = [];
 
@@ -15,7 +16,7 @@ function loadCommandFiles(dir) {
     } else if (entry.name.endsWith('.js')) {
       const command = require(fullPath);
       if (command.data) {
-        commands.push(command.data.toJSON());
+        commands.push(applyDeployPermissions(command.data.toJSON()));
         console.log(`  ✅ Loaded: ${command.data.name}`);
       }
     }

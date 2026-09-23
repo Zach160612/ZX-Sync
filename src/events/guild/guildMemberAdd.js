@@ -56,12 +56,18 @@ module.exports = {
 
     try {
       const welcomeType = config.welcomeType || 'text';
-      const welcomeMessage = config.welcomeMessage || `Welcome to **${member.guild.name}**! We're glad you're here.`;
+      const rawMessage = config.welcomeMessage || `Welcome to **{server}**, {user}! 🚀 We're glad you're here.`;
+      const welcomeMessage = rawMessage
+        .replace(/\{user\}/g, `<@${member.id}>`)
+        .replace(/\{username\}/g, member.user.username)
+        .replace(/\{userTag\}/g, member.user.tag || member.user.username)
+        .replace(/\{server\}/g, member.guild.name)
+        .replace(/\{memberCount\}/g, member.guild.memberCount);
 
       if (welcomeType === 'image') {
         try {
           // Generate welcome image
-          const imageBuffer = await generateWelcomeImage(member, member.guild.name);
+          const imageBuffer = await generateWelcomeImage(member, member.guild.name, config.welcomeImageUrl);
           const attachment = new AttachmentBuilder(imageBuffer, { name: 'welcome.png' });
 
           const embed = new EmbedBuilder()
