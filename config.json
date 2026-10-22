@@ -12,7 +12,11 @@
   "welcomeEnabled": true,
   "welcomeType": "image",
   "channels": {
-    "log": "LOG_CHANNEL_ID_HERE"
+    "log": "LOG_CHANNEL_ID_HERE",
+    "welcome": "1552754713425084599",
+    "goodbye": "1552754762578137199"
   },
-  "ticketSupportRole": "SUPPORT_ROLE_ID_HERE"
+  "ticketSupportRole": "SUPPORT_ROLE_ID_HERE",
+  "goodbyeType": "image",
+  "welcomeImageUrl": "https://cdn.discordapp.com/ephemeral-attachments/1553708368076734580/1553710936844410900/images.jpeg?ex=6aba3d91&is=6ab8ec11&hm=c6f89f9c96a364ccd038f94fbaf30af6528f9fefe50718ad6d3087329d1be6c6&"
 }

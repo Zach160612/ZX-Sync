@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, ChannelType, EmbedBuilder } = require('discord.js');
 const path = require('path');
-const { hasPermission, denyPermission } = require(path.join(__dirname, '..', '..', 'utils', 'permissions.js'));
+const { hasPermission } = require(path.join(__dirname, '..', '..', 'utils', 'permissions.js'));
 const { successEmbed, errorEmbed } = require(path.join(__dirname, '..', '..', 'utils', 'embeds.js'));
 const { logAction, buildLogEmbed } = require(path.join(__dirname, '..', '..', 'utils', 'logger.js'));
 const config = require('../../../config.json');
@@ -250,7 +250,7 @@ const TEMPLATES = {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('template')
-    .setDescription('Apply a complete server structure template (Gaming, School, Roleplay, Work).')
+    .setDescription('Apply a complete server structure template (Gaming, School, Roleplay, Work, MHUR).')
     .addStringOption((o) =>
       o
         .setName('type')
@@ -260,21 +260,161 @@ module.exports = {
           { name: '🎮 Gaming Server (Exact Layout)', value: 'gaming' },
           { name: '📚 School & Academy', value: 'school' },
           { name: '🎭 Roleplay & Lore', value: 'roleplay' },
-          { name: '💼 Work & Business', value: 'work' }
+          { name: '💼 Work & Business', value: 'work' },
+          { name: '🔧 MHUR (Clone from source server)', value: 'mhur' }
         )
     ),
 
   async execute(interaction) {
-    if (!hasPermission(interaction.member)) return denyPermission(interaction);
+    if (!hasPermission(interaction.member)) {
+      return interaction.reply({
+        embeds: [errorEmbed('Permission denied. This command is restricted to Owner, Admin, and Moderator only.')],
+        ephemeral: true,
+      });
+    }
 
     const templateKey = interaction.options.getString('type');
+
+    // Handle MHUR clone template
+    if (templateKey === 'mhur') {
+      try {
+        const sourceGuildId = '1552744554510295162';
+        const sourceGuild = await interaction.client.guilds.fetch(sourceGuildId);
+
+        if (!sourceGuild) {
+          return interaction.reply({
+            embeds: [errorEmbed('Could not find the source MHUR server. Make sure the bot is in that server.')],
+            ephemeral: true,
+          });
+        }
+
+        const targetGuild = interaction.guild;
+        let createdCount = 0;
+        let failedCount = 0;
+
+        // Clone Roles
+        for (const role of sourceGuild.roles.cache.values()) {
+          if (role.managed || role.position === 0) continue; // Skip @everyone and managed roles
+          try {
+            await sleep(200);
+            await targetGuild.roles.create({
+              name: role.name,
+              color: role.color,
+              hoist: role.hoist,
+              mentionable: role.mentionable,
+              permissions: role.permissions,
+              reason: `Cloned from MHUR by ${interaction.user.tag}`,
+            });
+            createdCount++;
+          } catch (roleErr) {
+            console.error(`Failed creating role ${role.name}:`, roleErr.message);
+            failedCount++;
+          }
+        }
+
+        // Clone Categories and Channels
+        for (const category of sourceGuild.channels.cache.filter(ch => ch.type === ChannelType.GuildCategory).values()) {
+          let newCategory = null;
+          try {
+            await sleep(350);
+            newCategory = await targetGuild.channels.create({
+              name: category.name,
+              type: ChannelType.GuildCategory,
+              position: category.position,
+              reason: `Cloned from MHUR by ${interaction.user.tag}`,
+            });
+            createdCount++;
+          } catch (catErr) {
+            console.error(`Failed creating category ${category.name}:`, catErr.message);
+            failedCount++;
+          }
+
+          // Clone channels in this category
+          for (const channel of category.children.cache.values()) {
+            try {
+              await sleep(350);
+              await targetGuild.channels.create({
+                name: channel.name,
+                type: channel.type,
+                parent: newCategory ? newCategory.id : undefined,
+                position: channel.position,
+                topic: channel.topic,
+                nsfw: channel.nsfw,
+                rateLimitPerUser: channel.rateLimitPerUser,
+                bitrate: channel.bitrate,
+                userLimit: channel.userLimit,
+                reason: `Cloned from MHUR by ${interaction.user.tag}`,
+              });
+              createdCount++;
+            } catch (chErr) {
+              console.error(`Failed creating channel ${channel.name}:`, chErr.message);
+              failedCount++;
+            }
+          }
+        }
+
+        // Clone channels without category
+        for (const channel of sourceGuild.channels.cache.filter(ch => !ch.parent).values()) {
+          if (channel.type === ChannelType.GuildCategory) continue;
+          try {
+            await sleep(350);
+            await targetGuild.channels.create({
+              name: channel.name,
+              type: channel.type,
+              position: channel.position,
+              topic: channel.topic,
+              nsfw: channel.nsfw,
+              rateLimitPerUser: channel.rateLimitPerUser,
+              bitrate: channel.bitrate,
+              userLimit: channel.userLimit,
+              reason: `Cloned from MHUR by ${interaction.user.tag}`,
+            });
+            createdCount++;
+          } catch (chErr) {
+            console.error(`Failed creating top channel ${channel.name}:`, chErr.message);
+            failedCount++;
+          }
+        }
+
+        const statusDetail = failedCount > 0
+          ? `Cloned **${createdCount}** items from MHUR (${failedCount} skipped due to server limits/errors).`
+          : `Successfully cloned **${createdCount}** roles, categories, and channels from MHUR.`;
+
+        const replyEmbed = new EmbedBuilder()
+          .setTitle('✅ MHUR Server Cloned!')
+          .setColor(config.color.success || '#57F287')
+          .setDescription(statusDetail)
+          .setFooter({ text: `Action performed by ${interaction.user.tag}` })
+          .setTimestamp();
+
+        await interaction.reply({ embeds: [replyEmbed] });
+
+        // Log the clone action
+        await logAction(
+          interaction.client,
+          buildLogEmbed({
+            title: '🔧 Server Cloned from MHUR',
+            color: config.color.success,
+            description: `**${interaction.user.tag}** cloned the MHUR server structure.`,
+            fields: [{ name: 'Items Created', value: `${createdCount}`, inline: true }],
+          })
+        );
+      } catch (err) {
+        console.error('Error cloning MHUR server:', err);
+        await interaction.reply({
+          embeds: [errorEmbed(`Failed to clone MHUR server: ${err.message}`)],
+          ephemeral: true,
+        });
+      }
+      return;
+    }
+
+    // Handle existing templates
     const selectedTemplate = TEMPLATES[templateKey];
 
     if (!selectedTemplate) {
       return interaction.reply({ embeds: [errorEmbed('Invalid template selected.')], ephemeral: true });
     }
-
-    await interaction.deferReply({ ephemeral: true });
 
     try {
       const guild = interaction.guild;
@@ -343,7 +483,7 @@ module.exports = {
         .setFooter({ text: `Action performed by ${interaction.user.tag}` })
         .setTimestamp();
 
-      await interaction.editReply({ embeds: [replyEmbed] });
+      await interaction.reply({ embeds: [replyEmbed] });
 
       // Log the template creation action
       await logAction(
@@ -357,8 +497,9 @@ module.exports = {
       );
     } catch (err) {
       console.error('Error creating server template:', err);
-      await interaction.editReply({
+      await interaction.reply({
         embeds: [errorEmbed(`Failed to build template: ${err.message}`)],
+        ephemeral: true,
       });
     }
   },

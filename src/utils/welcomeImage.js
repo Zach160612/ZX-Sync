@@ -11,12 +11,6 @@ async function drawBackground(ctx, baseWidth, baseHeight, customBgUrl, defaultGr
       const bgImg = await loadImage(customBgUrl);
       ctx.drawImage(bgImg, 0, 0, baseWidth, baseHeight);
       
-      // Add a subtle dark overlay for high text contrast
-      ctx.save();
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-      ctx.fillRect(0, 0, baseWidth, baseHeight);
-      ctx.restore();
-      
       loadedCustom = true;
     } catch (err) {
       console.error('Failed to load custom background image:', err.message);
@@ -49,31 +43,6 @@ async function generateWelcomeImage(member, serverName, customBgUrl = null) {
 
   // 1. Background (Custom image or Dark Navy Tech Gradient)
   await drawBackground(ctx, baseWidth, baseHeight, customBgUrl, ['#0d1117', '#161b22']);
-
-  // Tech Grid / Accent Lines
-  ctx.save();
-  ctx.strokeStyle = 'rgba(88, 101, 242, 0.15)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < baseWidth; x += 40) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, baseHeight);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  // Tech Badge Top-Right
-  ctx.save();
-  ctx.fillStyle = 'rgba(88, 101, 242, 0.2)';
-  ctx.roundRect ? ctx.roundRect(baseWidth - 190, 20, 170, 28, 6) : ctx.fillRect(baseWidth - 190, 20, 170, 28);
-  ctx.fill();
-  ctx.strokeStyle = '#5865F2';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.fillStyle = '#5865F2';
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillText('⚡ TECH COMMUNITY', baseWidth - 175, 38);
-  ctx.restore();
 
   // 2. Avatar (Center X: 150, Center Y: 150, Radius: 80)
   const avatarX = 150;
@@ -148,7 +117,7 @@ async function generateWelcomeImage(member, serverName, customBgUrl = null) {
   // Sub-message (Grey 18px)
   ctx.fillStyle = '#c9d1d9';
   ctx.font = '18px sans-serif';
-  ctx.fillText("We're excited to have you in our tech workspace! 🚀", textX, 250);
+  ctx.fillText("We are excited to have you in our server", textX, 250);
 
   // Member Count (White 16px)
   ctx.fillStyle = '#8b949e';
@@ -175,31 +144,6 @@ async function generateGoodbyeImage(member, serverName, customBgUrl = null) {
 
   // 1. Background (Custom image or Dark Red Tech Gradient)
   await drawBackground(ctx, baseWidth, baseHeight, customBgUrl, ['#160b0d', '#231013']);
-
-  // Tech Grid / Accent Lines (Red theme)
-  ctx.save();
-  ctx.strokeStyle = 'rgba(237, 66, 69, 0.15)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < baseWidth; x += 40) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, baseHeight);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  // Tech Badge Top-Right
-  ctx.save();
-  ctx.fillStyle = 'rgba(237, 66, 69, 0.2)';
-  ctx.roundRect ? ctx.roundRect(baseWidth - 190, 20, 170, 28, 6) : ctx.fillRect(baseWidth - 190, 20, 170, 28);
-  ctx.fill();
-  ctx.strokeStyle = '#ED4245';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.fillStyle = '#ED4245';
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillText('💻 TECH ALUMNI', baseWidth - 170, 38);
-  ctx.restore();
 
   // 2. Avatar (Center X: 150, Center Y: 150, Radius: 80)
   const avatarX = 150;
@@ -274,7 +218,7 @@ async function generateGoodbyeImage(member, serverName, customBgUrl = null) {
   // Sub-message (Grey 18px)
   ctx.fillStyle = '#c9d1d9';
   ctx.font = '18px sans-serif';
-  ctx.fillText("We wish you the best in your tech journey! 👋", textX, 250);
+  ctx.fillText("We'll miss you in our server", textX, 250);
 
   // Member Count (White 15px)
   ctx.fillStyle = '#8b949e';

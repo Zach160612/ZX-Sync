@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  StringSelectMenuBuilder,
 } = require('discord.js');
 const path = require('path');
 const fs = require('fs');
@@ -34,6 +35,10 @@ function buildStatusEmbed(guild) {
 
   const ticketRole = config.ticketSupportRole ? `<@&${config.ticketSupportRole}>` : 'Not set';
 
+  const lockChannelsList = Array.isArray(config.lockChannels) && config.lockChannels.length > 0
+    ? config.lockChannels.map((cId) => `<#${cId}>`).join(', ')
+    : 'None';
+
   return new EmbedBuilder()
     .setTitle('⚡ Tech Server Setup Status')
     .setColor(config.color?.primary || '#5865F2')
@@ -47,7 +52,8 @@ function buildStatusEmbed(guild) {
       { name: '💬 Goodbye Message', value: `\`${goodbyeMsg}\``, inline: false },
       { name: '📋 Audit Log Channel', value: logCh, inline: true },
       { name: '🛡️ Member Auto-Roles', value: autoRolesList, inline: true },
-      { name: '🎫 Ticket Support Role', value: ticketRole, inline: true }
+      { name: '🎫 Ticket Support Role', value: ticketRole, inline: true },
+      { name: '🔒 Lock Channels', value: lockChannelsList, inline: false }
     )
     .setFooter({ text: 'ZX Sync Tech Bot Setup' })
     .setTimestamp();
@@ -138,6 +144,12 @@ module.exports = {
         .addChoices(
           { name: '🚀 Tech Company Recommended Setup', value: 'tech_company' }
         )
+    )
+    .addStringOption((o) =>
+      o
+        .setName('lock_channels')
+        .setDescription('Select channels to lock (comma-separated channel IDs or names)')
+        .setRequired(false)
     ),
 
   async execute(interaction) {
@@ -153,6 +165,7 @@ module.exports = {
     const autoRole = interaction.options.getRole('autorole');
     const ticketRole = interaction.options.getRole('ticket_role');
     const preset = interaction.options.getString('preset');
+    const lockChannels = interaction.options.getString('lock_channels');
 
     const hasOptions =
       welcomeChannel ||
@@ -164,7 +177,8 @@ module.exports = {
       logChannel ||
       autoRole ||
       ticketRole ||
-      preset;
+      preset ||
+      lockChannels;
 
     if (!config.channels) config.channels = {};
 
@@ -240,6 +254,22 @@ module.exports = {
       if (ticketRole) {
         config.ticketSupportRole = ticketRole.id;
         changes.push(`Ticket Support Role: ${ticketRole}`);
+      }
+      if (lockChannels) {
+        if (!config.lockChannels) config.lockChannels = [];
+        const channelIds = lockChannels.split(',').map(id => id.trim());
+        
+        for (const channelId of channelIds) {
+          let channel = interaction.guild.channels.cache.get(channelId);
+          if (!channel) {
+            channel = interaction.guild.channels.cache.find(ch => ch.name.toLowerCase() === channelId.toLowerCase());
+          }
+          
+          if (channel && !config.lockChannels.includes(channel.id)) {
+            config.lockChannels.push(channel.id);
+            changes.push(`Lock Channel Added: ${channel.name}`);
+          }
+        }
       }
 
       saveConfig(config);
