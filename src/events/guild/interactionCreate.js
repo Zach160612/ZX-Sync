@@ -26,15 +26,23 @@ module.exports = {
   name: Events.InteractionCreate,
 
   async execute(interaction, client) {
+    console.log(`[Interaction] Type=${interaction.type} Name=${interaction.commandName || interaction.customId || 'unknown'} User=${interaction.user?.tag} Guild=${interaction.guild?.name || 'DM'}`);
+
     // ═══════════════════════════════════════════
     // SLASH COMMANDS
     // ═══════════════════════════════════════════
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
-      if (!command) return;
+      if (!command) {
+        console.warn(`[InteractionCreate] Unknown command: /${interaction.commandName}`);
+        return interaction.reply({ content: `❌ Command \`/${interaction.commandName}\` is not loaded in the bot.`, ephemeral: true }).catch(() => null);
+      }
 
       const subcommand = interaction.options.getSubcommand(false);
+      console.log(`[InteractionCreate] Executing /${interaction.commandName} (sub: ${subcommand}) for ${interaction.user.tag}`);
+
       if (!isPublicCommand(interaction.commandName, subcommand) && !hasPermission(interaction.member)) {
+        console.log(`[InteractionCreate] Denying permission for /${interaction.commandName} to ${interaction.user.tag}`);
         return denyPermission(interaction);
       }
 

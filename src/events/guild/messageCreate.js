@@ -10,6 +10,7 @@ module.exports = {
     // Ignore bots and direct messages
     if (!message.guild || message.author.bot) return;
 
+    console.log(`[Message] From ${message.author.tag} in #${message.channel.name}: "${message.content}"`);
     const content = message.content.trim().toLowerCase();
 
     // ─── 1. Helpful tip for prefix commands (!help, !ping, !live, etc.) ───
