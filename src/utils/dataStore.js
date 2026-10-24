@@ -13,6 +13,10 @@ const DEFAULT_DATA = {
   'events.json': [],
   'tickets.json': {},
   'giveaways.json': [],
+  'stream.json': {},
+  'clips.json': {},
+  'quotes.json': {},
+  'fan_xp.json': {},
 };
 
 // Initialize missing files with defaults

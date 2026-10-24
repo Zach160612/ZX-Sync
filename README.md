@@ -68,6 +68,34 @@ npm start
 | `/info` | Display bot information |
 | `/ping` | Check bot latency |
 
+### 📡 Streaming & Creator Hub
+| Command | Access | Description |
+|---|---|---|
+| `/live title game [platform] [url] [ping] [channel]` | Staff | Announce going live with interactive watch party and alert buttons |
+| `/socials` | Everyone | View creator channels (Twitch, Kick, YouTube, TikTok, X, Discord) |
+| `/schedule` | Everyone | View weekly streaming schedule and upcoming games |
+| `/streamping` | Everyone | Toggle the `@Stream Alerts` notification role |
+| `/stream setlink platform url` | Staff | Save your Twitch, Kick, YouTube, TikTok, X channel links |
+| `/stream setschedule day time [game] [note]` | Staff | Add or update weekly stream schedule entries |
+| `/stream clearschedule [day]` | Staff | Clear specific day or entire stream schedule |
+| `/stream setrole [role]` | Staff | Set or auto-create the `@Stream Alerts` role |
+| `/stream shoutout creator url [platform] [game]` | Staff | Shout out fellow streamers and raid targets with direct buttons |
+
+### 🎉 Community & Chat Revivers
+| Command | Access | Description |
+|---|---|---|
+| `/topic` | Everyone | Revive dry chat with 35+ gamer debates, hot takes & "Another Topic" button |
+| `/hype` | Everyone | Launch a 45-second interactive Community Hype Train minigame |
+| `/trivia` | Everyone | 25-second gaming & stream trivia challenge with answer buttons |
+| `/leaderboard top` | Everyone | View the Top 10 most active community chatters |
+| `/leaderboard rank [@user]` | Everyone | Check personal fan tier, chat level, and XP rank card |
+| `/clip submit url title` | Everyone | Submit favorite stream clips to the community showcase |
+| `/clip random` | Everyone | Play a random stream highlight submitted by fans |
+| `/clip list` | Everyone | Browse recently submitted stream clips |
+| `/quote add quote [context]` | Everyone | Save hilarious out-of-context streamer quotes |
+| `/quote random` | Everyone | Roll a random stream quote |
+| `/quote list` | Everyone | View the stream quotes archive |
+
 ### Moderation *(Staff only)*
 | Command | Description |
 |---|---|

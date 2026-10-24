@@ -252,6 +252,123 @@ module.exports = {
         return;
       }
 
+      // ── Stream Watching Button ──
+      if (customId.startsWith('stream_watch_')) {
+        const streamStore = require('../../utils/streamStore');
+        const streamData = streamStore.getStreamData(interaction.guild.id);
+        const currentLive = streamData.currentLive || { watchers: [] };
+
+        if (!currentLive.watchers) currentLive.watchers = [];
+        const userId = interaction.user.id;
+
+        if (currentLive.watchers.includes(userId)) {
+          return interaction.reply({
+            content: '🙌 You are already marked as watching the stream! Enjoy the broadcast!',
+            ephemeral: true,
+          });
+        }
+
+        currentLive.watchers.push(userId);
+        streamStore.updateStreamData(interaction.guild.id, { currentLive });
+
+        // Update live embed and button
+        const msg = interaction.message;
+        const oldEmbed = msg.embeds[0];
+        if (oldEmbed) {
+          const updatedEmbed = EmbedBuilder.from(oldEmbed);
+          const watchingField = updatedEmbed.data.fields?.find((f) => f.name.includes('Fans Watching'));
+          if (watchingField) {
+            watchingField.name = `👥 Fans Watching (${currentLive.watchers.length})`;
+            const preview = currentLive.watchers.slice(-5).map((id) => `<@${id}>`).join(', ');
+            watchingField.value = `${preview} ${currentLive.watchers.length > 5 ? `and ${currentLive.watchers.length - 5} more!` : ''}`;
+          }
+
+          // Update watching button label
+          const rows = msg.components.map((row) => {
+            const newRow = ActionRowBuilder.from(row);
+            newRow.components = newRow.components.map((c) => {
+              if (c.data.custom_id && c.data.custom_id.startsWith('stream_watch_')) {
+                return ButtonBuilder.from(c).setLabel(`I'm Watching! (${currentLive.watchers.length})`);
+              }
+              return c;
+            });
+            return newRow;
+          });
+
+          await msg.edit({ embeds: [updatedEmbed], components: rows }).catch(() => null);
+        }
+
+        // Award XP for supporting stream
+        streamStore.addMessageXp(interaction.guild.id, userId, interaction.user.username);
+
+        return interaction.reply({
+          content: '🎉 You\'re counted in the stream watch party! Thanks for supporting the stream! 🚀',
+          ephemeral: true,
+        });
+      }
+
+      // ── Stream Ping Toggle Button ──
+      if (customId === 'stream_ping_toggle') {
+        const streamStore = require('../../utils/streamStore');
+        const streamData = streamStore.getStreamData(interaction.guild.id);
+        let roleId = streamData.streamPingRoleId;
+        let role = roleId ? interaction.guild.roles.cache.get(roleId) : null;
+
+        if (!role) {
+          role = interaction.guild.roles.cache.find(
+            (r) =>
+              r.name.toLowerCase().includes('stream alert') ||
+              r.name.toLowerCase().includes('stream ping') ||
+              r.name.toLowerCase().includes('live ping')
+          );
+          if (role) {
+            streamStore.updateStreamData(interaction.guild.id, { streamPingRoleId: role.id });
+          }
+        }
+
+        if (!role) {
+          return interaction.reply({
+            content: '❌ No Stream Notification role configured on this server yet. Staff can set one up with `/stream setrole`.',
+            ephemeral: true,
+          });
+        }
+
+        const member = interaction.member;
+        const hasRole = member.roles.cache.has(role.id);
+
+        try {
+          if (hasRole) {
+            await member.roles.remove(role, 'User toggled stream alerts');
+            return interaction.reply({
+              content: `🔕 You will no longer receive **${role.name}** notifications. Click again anytime to re-enable!`,
+              ephemeral: true,
+            });
+          } else {
+            await member.roles.add(role, 'User toggled stream alerts');
+            return interaction.reply({
+              content: `🔔 You now have the **${role.name}** role! You'll be pinged whenever the stream goes live! 🚀`,
+              ephemeral: true,
+            });
+          }
+        } catch (err) {
+          return interaction.reply({
+            content: `❌ Could not update role: ${err.message}. Bot role must be above the stream role.`,
+            ephemeral: true,
+          });
+        }
+      }
+
+      // ── Topic Next Button ──
+      if (customId === 'topic_next') {
+        const topicModule = require('../../commands/community/topic');
+        const topic = topicModule.getRandomTopic();
+        const embed = topicModule.buildTopicEmbed(topic, interaction.user.username);
+
+        return interaction.update({
+          embeds: [embed],
+        });
+      }
+
       return;
     }
 

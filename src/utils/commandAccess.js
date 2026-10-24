@@ -9,6 +9,15 @@ const PUBLIC_COMMANDS = {
   info: true,
   ping: true,
   roles: ['get'],
+  socials: true,
+  schedule: true,
+  streamping: true,
+  topic: true,
+  hype: true,
+  trivia: true,
+  clip: ['submit', 'random', 'list'],
+  quote: ['add', 'random', 'list'],
+  leaderboard: ['top', 'rank'],
 };
 
 /** Discord permission required to see staff commands in the slash picker */
@@ -34,8 +43,8 @@ function isPublicCommand(commandName, subcommand) {
 function applyDeployPermissions(commandJson) {
   const entry = PUBLIC_COMMANDS[commandJson.name];
 
-  // Fully public commands stay visible to everyone
-  if (entry === true) return commandJson;
+  // Fully public commands or commands with public subcommands stay visible to everyone
+  if (entry === true || Array.isArray(entry)) return commandJson;
 
   // /roles has a public subcommand — keep visible; runtime checks handle /roles panel
   if (commandJson.name === 'roles') return commandJson;
